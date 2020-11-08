@@ -7,3 +7,7 @@ jspm_packages
 
 # Webpack directories
 .webpack
+
+# secrets
+.env
+.vscode/settings.json
