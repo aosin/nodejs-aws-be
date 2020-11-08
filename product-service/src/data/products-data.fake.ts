@@ -8,11 +8,6 @@ export class ProductsData {
     return products;
   }
   async getById(id: string): Promise<Product | null> {
-    try {
-      return products.find((product) => product.id === id) || null;
-    } catch (e) {
-      console.error(e);
-      throw e;
-    }
+    return products.find((product) => product.id === id) || null;
   }
 }

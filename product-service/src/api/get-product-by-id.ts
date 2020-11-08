@@ -4,11 +4,15 @@ import { ProductsData } from '../data/products-data';
 import { jsonResult } from './helpers/json-result';
 import { productNotFoundError } from './errors/product-not-found.error';
 import { cannotGetProductsDataError } from './errors/cannot-get-data.error';
+import { getLog } from './helpers/get-log';
 
 export const getProductById: APIGatewayProxyHandler = async (
   event,
-  _context
+  context
 ) => {
+  const { log, logCall } = getLog(event, context);
+  logCall();
+
   const productId = event.pathParameters.productId;
   if (productId) {
     try {
@@ -16,7 +20,8 @@ export const getProductById: APIGatewayProxyHandler = async (
       const product = await productsData.getById(productId);
 
       return product ? jsonResult(product) : productNotFoundError(productId);
-    } catch {
+    } catch (error) {
+      log.error(error);
       return cannotGetProductsDataError();
     }
   }

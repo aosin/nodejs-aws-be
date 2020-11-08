@@ -22,9 +22,6 @@ export class ProductsData {
       const res = await client.query(productsQuery);
       const products = res.rows.map((data) => this.parseProduct(data));
       return products;
-    } catch (error) {
-      console.error(error);
-      throw error;
     } finally {
       await client.end();
     }
@@ -44,9 +41,6 @@ export class ProductsData {
       }
       const product = this.parseProduct(res.rows[0]);
       return product;
-    } catch (error) {
-      console.error(error);
-      throw error;
     } finally {
       await client.end();
     }
