@@ -19,7 +19,10 @@ export class ProductsData {
     const client = new Client();
     try {
       await client.connect();
-      const res = await client.query(productsQuery);
+      const res = await client.query(
+        `${productsQuery} 
+        where stocks.count > 0`
+      );
       const products = res.rows.map((data) => this.parseProduct(data));
       return products;
     } finally {
