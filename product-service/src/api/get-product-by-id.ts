@@ -16,10 +16,18 @@ export const getProductById: APIGatewayProxyHandler = async (
   logCall();
 
   const productId = event.pathParameters.productId;
-  const validationResult = validate(productId, {
-    type: 'string',
-    pattern: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
-  });
+  const validationResult = validate(
+    { productId },
+    {
+      properties: {
+        productId: {
+          type: 'string',
+          pattern:
+            '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
+        },
+      },
+    }
+  );
   if (!validationResult.valid) {
     log.error(validationResult.toString());
     return invalidInputError(validationResult);

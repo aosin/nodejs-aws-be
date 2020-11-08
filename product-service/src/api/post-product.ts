@@ -33,6 +33,7 @@ const productSchema = {
     },
   },
   required: ['title', 'price', 'count'],
+  additionalProperties: false,
 };
 
 export const postProduct: APIGatewayProxyHandler = async (event, context) => {
