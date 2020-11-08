@@ -7,5 +7,5 @@ export const invalidInputError = (validationResult: ValidatorResult) =>
       message: 'Invalid input',
       errors: validationResult.errors.map((error) => error.toString()),
     },
-    500
+    400
   );

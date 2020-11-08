@@ -6,5 +6,5 @@ export const cannotParseProductError = (data: any) =>
       message: 'Cannot parse product',
       data,
     },
-    500
+    400
   );
