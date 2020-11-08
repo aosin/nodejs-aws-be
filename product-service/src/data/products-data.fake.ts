@@ -1,5 +1,5 @@
-import productList from "./productList.json";
-import { Product } from "./product.interface";
+import productList from './productList.json';
+import { Product } from './product.interface';
 
 const products = productList as Product[];
 
