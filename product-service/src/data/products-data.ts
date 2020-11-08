@@ -46,6 +46,49 @@ export class ProductsData {
     }
   }
 
+  async listProduct(product: Product): Promise<Product> {
+    const client = new Client();
+    try {
+      await client.connect();
+      await client.query('begin transaction');
+      const productResult = await client.query(
+        `insert into products (
+          title,
+          description,
+          price,
+          image_url
+        ) values ($1, $2, $3, $4)
+        returning id`,
+        [
+          product.title,
+          product.description,
+          Math.floor(product.price * 100),
+          product.imageUrl,
+        ]
+      );
+      const id = productResult.rows[0].id;
+      await client.query(
+        `insert into stocks (
+          product_id,
+          "count"
+        ) values ($1, $2)`,
+        [id, product.count]
+      );
+      await client.query('commit');
+
+      const newProduct = {
+        ...product,
+        id,
+      };
+      return newProduct;
+    } catch (error) {
+      await client.query('rollback');
+      throw error;
+    } finally {
+      await client.end();
+    }
+  }
+
   private parseProduct(data: any): Product {
     return {
       ...data,

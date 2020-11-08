@@ -10,4 +10,8 @@ export class ProductsData {
   async getById(id: string): Promise<Product | null> {
     return products.find((product) => product.id === id) || null;
   }
+  async listProduct(product: Product): Promise<Product> {
+    products.push(product);
+    return product;
+  }
 }
