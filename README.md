@@ -18,3 +18,6 @@ GET https://ou3vz8mib5.execute-api.eu-west-1.amazonaws.com/dev/product/available
 
 Get product by id:
 GET https://ou3vz8mib5.execute-api.eu-west-1.amazonaws.com/dev/product/7567ec4b-b10c-48c5-9345-fc73c48a80a0
+
+Add new product and put into stock:
+POST - https://ou3vz8mib5.execute-api.eu-west-1.amazonaws.com/dev/product
