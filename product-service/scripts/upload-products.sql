@@ -6,6 +6,7 @@ CREATE TEMP TABLE json_product_list (
     title text,
     description text,
     price numeric(13, 2),
+    "imageUrl" text,
     "count" int
 ) ON COMMIT DROP;
 
@@ -14,15 +15,18 @@ SELECT * FROM json_populate_recordset(null::json_product_list, %L);
 
 TRUNCATE products CASCADE;
 INSERT INTO products
-SELECT id,
+SELECT 
+    id,
     title,
     description,
-    (price * 100) AS price
+    (price * 100) AS price,
+    "imageUrl" as image_url
 FROM json_product_list;
 
 TRUNCATE stocks CASCADE;
 INSERT INTO stocks
-SELECT id AS product_id,
+SELECT 
+    id AS product_id,
     "count"
 FROM json_product_list;
 
