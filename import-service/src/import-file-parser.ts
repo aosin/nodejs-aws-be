@@ -16,11 +16,11 @@ const moveToParsed = async (
     CopySource: `/${bucket}/${objectKey}`,
     Bucket: bucket,
     Key: newKey,
-  });
+  }).promise();
   await s3.deleteObject({
     Bucket: bucket,
     Key: objectKey,
-  });
+  }).promise();
   return newKey;
 };
 
