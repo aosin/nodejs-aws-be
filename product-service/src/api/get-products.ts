@@ -6,7 +6,7 @@ import { cannotGetProductsDataError } from './errors/cannot-get-data.error';
 import { getLog } from './helpers/get-log';
 
 export const getProducts: APIGatewayProxyHandler = async (event, context) => {
-  const {log,logCall} = getLog(event, context);
+  const { log, logCall } = getLog(event, context);
   logCall();
 
   try {

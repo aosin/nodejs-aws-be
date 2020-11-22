@@ -13,6 +13,7 @@ const serverlessConfiguration: Serverless = {
     'serverless-offline': {
       httpPort: 4000,
     },
+    productsQueueName: 'rsaosin-candies-products-queue-${self:provider.stage}',
   },
   plugins: [
     'serverless-webpack',
@@ -31,6 +32,13 @@ const serverlessConfiguration: Serverless = {
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
     },
+    iamRoleStatements: [
+      {
+        Effect: 'Allow',
+        Action: 'sqs:*',
+        Resource: [{ 'Fn::GetAtt': ['ProductsQueue', 'Arn'] }],
+      },
+    ],
   },
   functions: {
     getProducts: {
@@ -75,6 +83,39 @@ const serverlessConfiguration: Serverless = {
           },
         },
       ],
+    },
+    catalogBatchProcess: {
+      handler: 'handler.catalogBatchProcess',
+      events: [
+        {
+          sqs: {
+            batchSize: 5,
+            arn: { 'Fn::GetAtt': ['ProductsQueue', 'Arn'] },
+          },
+        },
+      ],
+    },
+  },
+  resources: {
+    Resources: {
+      ProductsQueue: {
+        Type: 'AWS::SQS::Queue',
+        Properties: {
+          QueueName: '${self:custom.productsQueueName}',
+          ReceiveMessageWaitTimeSeconds: 20,
+        },
+      },
+    },
+    Outputs: {
+      ProductsQueueName: {
+        Value: { 'Fn::GetAtt': ['ProductsQueue', 'QueueName'] },
+      },
+      ProductsQueueArn: {
+        Value: { 'Fn::GetAtt': ['ProductsQueue', 'Arn'] },
+      },
+      ProductsQueueUrl: {
+        Value: { Ref: 'ProductsQueue' },
+      },
     },
   },
 };

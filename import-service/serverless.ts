@@ -13,6 +13,12 @@ const serverlessConfiguration: Serverless = {
       httpPort: 4000,
     },
     s3BucketName: 'rsaosin-candies-import-${self:provider.stage}',
+    productServiceStackName:
+      'rsaosin-candies-product-service-${self:provider.stage}',
+    productsQueueArn:
+      '${cf:${self:custom.productServiceStackName}.ProductsQueueArn}',
+    productsQueueUrl:
+      '${cf:${self:custom.productServiceStackName}.ProductsQueueUrl}',
   },
   plugins: [
     'serverless-webpack',
@@ -31,21 +37,24 @@ const serverlessConfiguration: Serverless = {
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       IMPORT_SERVICE_BUCKET: '${self:custom.s3BucketName}',
+      PRODUCTS_QUEUE_URL: '${self:custom.productsQueueUrl}',
+      BATCH_SIZE: 5,
     },
     iamRoleStatements: [
       {
         Effect: 'Allow',
         Action: 's3:*',
-        Resource: [
-          'arn:aws:s3:::${self:custom.s3BucketName}/*'
-        ],
+        Resource: ['arn:aws:s3:::${self:custom.s3BucketName}/*'],
       },
       {
         Effect: 'Allow',
         Action: 's3:ListBucket',
-        Resource: [
-          'arn:aws:s3:::${self:custom.s3BucketName}'
-        ],
+        Resource: ['arn:aws:s3:::${self:custom.s3BucketName}'],
+      },
+      {
+        Effect: 'Allow',
+        Action: 'sqs:*',
+        Resource: ['${self:custom.productsQueueArn}'],
       },
     ],
   },
