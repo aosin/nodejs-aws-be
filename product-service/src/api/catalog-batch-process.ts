@@ -3,6 +3,9 @@ import { getLog } from './helpers/get-log';
 import { Product } from '../data/product.interface';
 import { validate } from 'jsonschema';
 import { ProductsData } from '../data/products-data';
+import { SNS } from 'aws-sdk';
+
+const sns = new SNS();
 
 const productSchema = {
   type: 'object',
@@ -39,6 +42,8 @@ export const catalogBatchProcess: SQSHandler = async (event, context) => {
   const { log, logCall } = getLog(event, context);
   logCall();
 
+  const created: Product[] = [];
+  const updated: Product[] = [];
   for (const record of event.Records) {
     record.body;
 
@@ -59,9 +64,11 @@ export const catalogBatchProcess: SQSHandler = async (event, context) => {
     try {
       if (product.id) {
         const newProduct = await productsData.createOrUpdateProduct(product);
+        updated.push(newProduct);
         log.info('Updated a product:', { product: newProduct });
       } else {
         const newProduct = await productsData.createProduct(product);
+        created.push(newProduct);
         log.info('Created a new product:', { product: newProduct });
       }
     } catch (error) {
@@ -69,4 +76,17 @@ export const catalogBatchProcess: SQSHandler = async (event, context) => {
       throw error;
     }
   }
+
+  const topicArn = process.env.CREATE_PRODUCT_TOPIC;
+  log.info('Publishing to topic', { topicArn, created, updated });
+  const message =
+    'The following products were created or updated:\n' +
+    JSON.stringify({ created, updated }, null, 2);
+  await sns
+    .publish({
+      TopicArn: topicArn,
+      Subject: 'Products created',
+      Message: message,
+    })
+    .promise();
 };

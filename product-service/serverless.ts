@@ -31,12 +31,18 @@ const serverlessConfiguration: Serverless = {
     } as Aws.ApiGateway & any,
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+      CREATE_PRODUCT_TOPIC: { Ref: 'CreateProductTopic' },
     },
     iamRoleStatements: [
       {
         Effect: 'Allow',
         Action: 'sqs:*',
         Resource: [{ 'Fn::GetAtt': ['ProductsQueue', 'Arn'] }],
+      },
+      {
+        Effect: 'Allow',
+        Action: 'sns:*',
+        Resource: [{ Ref: 'CreateProductTopic' }],
       },
     ],
   },
@@ -103,6 +109,20 @@ const serverlessConfiguration: Serverless = {
         Properties: {
           QueueName: '${self:custom.productsQueueName}',
           ReceiveMessageWaitTimeSeconds: 20,
+        },
+      },
+      CreateProductTopic: {
+        Type: 'AWS::SNS::Topic',
+        Properties: {
+          TopicName:
+            '${self:service}-create-product-topic-${self:provider.stage}',
+          DisplayName: 'Products created',
+          Subscription: [
+            {
+              Protocol: 'email',
+              Endpoint: '${env:PRODUCTS_CREATED_EMAIL}',
+            },
+          ],
         },
       },
     },

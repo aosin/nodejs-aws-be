@@ -20,6 +20,7 @@
     "@types/aws-lambda": "^8.10.17",
     "@types/node": "^10.12.18",
     "@types/serverless": "^1.72.5",
+    "aws-sdk": "^2.797.0",
     "dotenv": "^8.2.0",
     "fork-ts-checker-webpack-plugin": "^3.0.1",
     "pg-format": "^1.0.4",
