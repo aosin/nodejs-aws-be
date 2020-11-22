@@ -14,14 +14,19 @@ export const importProductsFile: APIGatewayProxyHandler = async (
   const { log, logCall } = getLog(event, context);
   logCall();
 
-  const validationResult = validate(event.queryStringParameters, {
+  const validationResult = validate(event, {
     properties: {
-      name: {
-        type: 'string',
-        pattern: '[^/.]+.csv',
+      queryStringParameters: {
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+            pattern: '[^/.]+.csv',
+          },
+        },
+        required: ['name'],
       },
     },
-    required: ['name'],
   });
 
   if (!validationResult.valid) {
