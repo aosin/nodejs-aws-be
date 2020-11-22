@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS products(
 );
 DROP TABLE IF EXISTS stocks cascade;
 CREATE TABLE IF NOT EXISTS stocks(
-        product_id uuid not null,
+        product_id uuid not null UNIQUE,
         "count" int not null,
         FOREIGN KEY (product_id) REFERENCES products (id)
 );

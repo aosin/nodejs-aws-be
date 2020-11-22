@@ -56,7 +56,7 @@ export const postProduct: APIGatewayProxyHandler = async (event, context) => {
 
   try {
     const productsData = new ProductsData();
-    const newProduct = await productsData.listProduct(product);
+    const newProduct = await productsData.createProduct(product);
 
     return jsonResult(newProduct);
   } catch (error) {

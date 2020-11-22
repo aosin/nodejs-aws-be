@@ -33,6 +33,11 @@ const productSchema = {
   additionalProperties: false,
 };
 
+const removeEmptyFields = (obj: object) =>
+  Object.entries(obj)
+    .filter(([, value]) => value != null && value !== '')
+    .reduce((result, [key, value]) => ((result[key] = value), result), {});
+
 export const parseImportFileData = <T>(
   stream: Readable,
   reducer: (product: Product, acc?: T) => Promise<T>,
@@ -46,11 +51,11 @@ export const parseImportFileData = <T>(
       .on('data', async (data) => {
         line += 1;
 
-        const product = {
+        const product = removeEmptyFields({
           ...data,
           count: Number(data.count),
           price: Number(data.price),
-        };
+        }) as Product;
 
         const validationResult = validate(product, productSchema);
         if (!validationResult.valid) {
