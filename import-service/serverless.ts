@@ -19,6 +19,10 @@ const serverlessConfiguration: Serverless = {
       '${cf:${self:custom.productServiceStackName}.ProductsQueueArn}',
     productsQueueUrl:
       '${cf:${self:custom.productServiceStackName}.ProductsQueueUrl}',
+    authorizationServiceStackName:
+      'rsaosin-candies-authorization-service-${self:provider.stage}',
+    basicAuthorizerArn:
+      '${cf:${self:custom.authorizationServiceStackName}.BasicAuthorizerArn}',
   },
   plugins: [
     'serverless-webpack',
@@ -74,6 +78,13 @@ const serverlessConfiguration: Serverless = {
               },
             },
             cors: true,
+            authorizer: {
+              name: 'basicAuthorizer',
+              arn: '${self:custom.basicAuthorizerArn}',
+              type: 'TOKEN',
+              identitySource: 'method.request.header.Authorization',
+              identityValidationExpression: 'Basic (.*)',
+            },
           },
         },
       ],
@@ -93,6 +104,51 @@ const serverlessConfiguration: Serverless = {
           },
         },
       ],
+    },
+  },
+  resources: {
+    Resources: {
+      GatewayResponseDefault4XX: {
+        Type: 'AWS::ApiGateway::GatewayResponse',
+        Properties: {
+          ResponseParameters: {
+            'gatewayresponse.header.Access-Control-Allow-Origin': "'*'",
+            'gatewayresponse.header.Access-Control-Allow-Headers': "'*'",
+          },
+          ResponseType: 'DEFAULT_4XX',
+          RestApiId: {
+            Ref: 'ApiGatewayRestApi',
+          },
+        },
+      },
+      GatewayResponseDefault5XX: {
+        Type: 'AWS::ApiGateway::GatewayResponse',
+        Properties: {
+          ResponseParameters: {
+            'gatewayresponse.header.Access-Control-Allow-Origin': "'*'",
+            'gatewayresponse.header.Access-Control-Allow-Headers': "'*'",
+          },
+          ResponseType: 'DEFAULT_5XX',
+          RestApiId: {
+            Ref: 'ApiGatewayRestApi',
+          },
+        },
+      },
+      GatewayResponseUnauthorized: {
+        Type: 'AWS::ApiGateway::GatewayResponse',
+        Properties: {
+          ResponseParameters: {
+            'gatewayresponse.header.Access-Control-Allow-Origin': "'*'",
+            'gatewayresponse.header.Access-Control-Allow-Headers': "'*'",
+            'gatewayresponse.header.WWW-Authenticate':
+              '\'Basic realm="import-service"\'',
+          },
+          ResponseType: 'UNAUTHORIZED',
+          RestApiId: {
+            Ref: 'ApiGatewayRestApi',
+          },
+        },
+      },
     },
   },
 };
