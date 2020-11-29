@@ -13,6 +13,7 @@ const serverlessConfiguration: Serverless = {
     'serverless-offline': {
       httpPort: 4000,
     },
+    productsQueueName: 'rsaosin-candies-products-queue-${self:provider.stage}',
   },
   plugins: [
     'serverless-webpack',
@@ -30,7 +31,20 @@ const serverlessConfiguration: Serverless = {
     } as Aws.ApiGateway & any,
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+      CREATE_PRODUCT_TOPIC: { Ref: 'CreateProductTopic' },
     },
+    iamRoleStatements: [
+      {
+        Effect: 'Allow',
+        Action: 'sqs:*',
+        Resource: [{ 'Fn::GetAtt': ['ProductsQueue', 'Arn'] }],
+      },
+      {
+        Effect: 'Allow',
+        Action: 'sns:*',
+        Resource: [{ Ref: 'CreateProductTopic' }],
+      },
+    ],
   },
   functions: {
     getProducts: {
@@ -75,6 +89,53 @@ const serverlessConfiguration: Serverless = {
           },
         },
       ],
+    },
+    catalogBatchProcess: {
+      handler: 'handler.catalogBatchProcess',
+      events: [
+        {
+          sqs: {
+            batchSize: 5,
+            arn: { 'Fn::GetAtt': ['ProductsQueue', 'Arn'] },
+          },
+        },
+      ],
+    },
+  },
+  resources: {
+    Resources: {
+      ProductsQueue: {
+        Type: 'AWS::SQS::Queue',
+        Properties: {
+          QueueName: '${self:custom.productsQueueName}',
+          ReceiveMessageWaitTimeSeconds: 20,
+        },
+      },
+      CreateProductTopic: {
+        Type: 'AWS::SNS::Topic',
+        Properties: {
+          TopicName:
+            '${self:service}-create-product-topic-${self:provider.stage}',
+          DisplayName: 'Products created',
+          Subscription: [
+            {
+              Protocol: 'email',
+              Endpoint: '${env:PRODUCTS_CREATED_EMAIL}',
+            },
+          ],
+        },
+      },
+    },
+    Outputs: {
+      ProductsQueueName: {
+        Value: { 'Fn::GetAtt': ['ProductsQueue', 'QueueName'] },
+      },
+      ProductsQueueArn: {
+        Value: { 'Fn::GetAtt': ['ProductsQueue', 'Arn'] },
+      },
+      ProductsQueueUrl: {
+        Value: { Ref: 'ProductsQueue' },
+      },
     },
   },
 };
