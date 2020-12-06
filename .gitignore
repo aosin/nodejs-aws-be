@@ -10,7 +10,7 @@ jspm_packages
 
 # secrets
 .env
-.vscode/settings.json
+**/.vscode/settings.json
 
 # other
 .DS_Store
